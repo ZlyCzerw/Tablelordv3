@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "561376220220",
+    "firebase_url": "https://tablelordv3.firebaseio.com",
+    "project_id": "tablelordv3",
+    "storage_bucket": "tablelordv3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:561376220220:android:2ad04a6e19d66e85",
+        "android_client_info": {
+          "package_name": "com.tablelord.tablelordv3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "561376220220-v1c8keubgnr9mv29bj6n2m4n0rot3kkn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tablelord.tablelordv3",
+            "certificate_hash": "fa2912809fbed6a83078de2c0f6b8aa3458b0797"
+          }
+        },
+        {
+          "client_id": "561376220220-8o52q847l6b6gmjqg2vc9nq70lsokrat.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-S3uOxu3rzwTgn1KwBHMDY41MH7XZb28"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "561376220220-8o52q847l6b6gmjqg2vc9nq70lsokrat.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
