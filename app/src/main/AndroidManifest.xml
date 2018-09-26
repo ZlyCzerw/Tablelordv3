@@ -16,6 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Level0Activity" />
+        <activity android:name=".HarleyActivity" />
+        <activity android:name=".PatioActivity"></activity>
     </application>
 
 </manifest>

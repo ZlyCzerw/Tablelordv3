@@ -19,26 +19,22 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-public class MainActivity extends AppCompatActivity {
+public class Level0Activity extends AppCompatActivity {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference basementReference = db.collection("basement");
+    private CollectionReference level0Reference = db.collection("level0");
     private TableAdapter tableAdapter;
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_level0);
 
         FloatingActionButton basement = findViewById(R.id.button_basement);
         basement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                Intent intent = new Intent(Level0Activity.this, MainActivity.class);
                 startActivity(intent);
             }
         });
@@ -46,15 +42,15 @@ public class MainActivity extends AppCompatActivity {
         level0.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, Level0Activity.class);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(Level0Activity.this, Level0Activity.class);
+                startActivity(intent);
+            }
         });
         FloatingActionButton harley = findViewById(R.id.button_level_harley);
         harley.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, HarleyActivity.class);
+                Intent intent = new Intent(Level0Activity.this, HarleyActivity.class);
                 startActivity(intent);
             }
         });
@@ -62,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         patio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, PatioActivity.class);
+                Intent intent = new Intent(Level0Activity.this, PatioActivity.class);
                 startActivity(intent);
             }
         });
@@ -70,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setUpRecyclerView();
     }
     private void setUpRecyclerView(){
-        Query query = basementReference.orderBy("tableNumber",Query.Direction.ASCENDING);
+        Query query = level0Reference.orderBy("tableNumber",Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<Table> options = new FirestoreRecyclerOptions.Builder<Table>()
                 .setQuery(query, Table.class)
                 .build();
@@ -81,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(tableAdapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,0/*ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT*/) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
                 return false;
@@ -93,46 +89,45 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerView);
 
-            tableAdapter.setOnItemClickListener(new TableAdapter.OnItemCLickListener() {
-                @Override
-                public void onItemClick(final DocumentSnapshot documentSnapshot, int position) {
-                    Table table = documentSnapshot.toObject(Table.class);
+        tableAdapter.setOnItemClickListener(new TableAdapter.OnItemCLickListener() {
+            @Override
+            public void onItemClick(final DocumentSnapshot documentSnapshot, int position) {
+                Table table = documentSnapshot.toObject(Table.class);
 
-                    if(table.isTableOccupied()){
-                        basementReference.document(documentSnapshot.getId()).update("tableOccupied",false).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "stolik wolny", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), " nope (table initially occupied) ", Toast.LENGTH_SHORT).show();
+                if(table.isTableOccupied()){
+                    level0Reference.document(documentSnapshot.getId()).update("tableOccupied",false).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), "stolik wolny", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), " nope (table initially occupied) ", Toast.LENGTH_SHORT).show();
 
-                                }
                             }
-                        });
+                        }
+                    });
 
-                    }else {
-                        basementReference.document(documentSnapshot.getId()).update("tableOccupied",true).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "stolik zarezerwowany", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), " nope (table initially free) ", Toast.LENGTH_SHORT).show();
+                }else {
+                    level0Reference.document(documentSnapshot.getId()).update("tableOccupied",true).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), "stolik zarezerwowany", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), " nope (table initially free) ", Toast.LENGTH_SHORT).show();
 
-                                }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
-            });
-        }
+            }
+        });
+    }
+
 
     @Override
     protected void onStart() {
         super.onStart();
         tableAdapter.startListening();
     }
-
-
 }

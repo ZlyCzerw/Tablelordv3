@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="4dp"
-    app:cardBackgroundColor="#090353">
+    app:cardBackgroundColor="#787fa3">
 
 <RelativeLayout
     android:layout_width="match_parent"
@@ -28,10 +28,12 @@
         android:text="table: number"
         android:textColor="#ffffff"
         android:maxLines="1"
+        android:gravity="center"
         android:layout_toStartOf="@+id/text_view_table_seats"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:textSize="48dp"/>
 
     <TextView
         android:id="@+id/text_view_table_occupied"
@@ -39,8 +41,9 @@
         android:layout_height="wrap_content"
         android:text="true"
         android:textColor="#ffffff"
+
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/text_view_table_number"
+
         android:textAppearance="@style/Base.TextAppearance.AppCompat"/>
 
 

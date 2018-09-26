@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.TableHolder> {
 
@@ -16,10 +17,12 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
         super(options);
     }
 
+    private OnItemCLickListener onItemCLickListener;
+
     @Override
     protected void onBindViewHolder(@NonNull TableHolder holder, int position, @NonNull Table model) {
         holder.textViewTableNumber.setText(model.getTableNumber());
-        holder.textViewTableSeats.setText(String.valueOf(model.getTableSeats()));
+        holder.textViewTableSeats.setText(model.getTableSeats());
         holder.textViewTableOccupied.setText(String.valueOf(model.isTableOccupied()));
     }
 
@@ -41,6 +44,22 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
             textViewTableNumber = itemView.findViewById(R.id.text_view_table_number);
             textViewTableSeats = itemView.findViewById(R.id.text_view_table_seats);
             textViewTableOccupied = itemView.findViewById(R.id.text_view_table_occupied);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION && onItemCLickListener!=null){
+                        onItemCLickListener.onItemClick( getSnapshots().getSnapshot(position), position );
+                    }
+                }
+            });
         }
+    }
+    public interface OnItemCLickListener {
+        void onItemClick(DocumentSnapshot documentSnapshot, int position);
+    }
+    public void setOnItemClickListener(OnItemCLickListener onItemClickListener){
+        this.onItemCLickListener = onItemClickListener;
     }
 }
