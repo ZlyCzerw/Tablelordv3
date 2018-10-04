@@ -2,6 +2,7 @@ package com.tablelord.tablelordv3;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -70,18 +71,19 @@ public class MainActivity extends AppCompatActivity {
         setUpRecyclerView();
     }
     private void setUpRecyclerView(){
-        Query query = basementReference.orderBy("tableNumber",Query.Direction.ASCENDING);
+        final Query query = basementReference.orderBy("tableNumber",Query.Direction.ASCENDING);
         FirestoreRecyclerOptions<Table> options = new FirestoreRecyclerOptions.Builder<Table>()
                 .setQuery(query, Table.class)
                 .build();
 
         tableAdapter = new TableAdapter(options);
+
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(tableAdapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,0/*ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT*/) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
                 return false;
@@ -116,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
+
                                     Toast.makeText(getApplicationContext(), "stolik zarezerwowany", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(getApplicationContext(), " nope (table initially free) ", Toast.LENGTH_SHORT).show();

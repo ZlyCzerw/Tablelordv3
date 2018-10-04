@@ -1,6 +1,8 @@
 package com.tablelord.tablelordv3;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,7 @@ public class PatioActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference patioReference = db.collection("patio");
     private TableAdapter tableAdapter;
+    private boolean redLight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,15 @@ public class PatioActivity extends AppCompatActivity {
             }
         });
         FloatingActionButton patio = findViewById(R.id.button_level_patio);
+        //change FAB color
+//        if( tableAdapter.isRedLight()){
+//
+//            patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                    .parseColor("#BF360C")));
+//       }else {
+//            patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                    .parseColor("8BC34A")));
+//          }
         patio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,6 +76,7 @@ public class PatioActivity extends AppCompatActivity {
         });
 
         setUpRecyclerView();
+        redLight = tableAdapter.isRedLight();
     }
     private void setUpRecyclerView(){
         Query query = patioReference.orderBy("tableNumber",Query.Direction.ASCENDING);
@@ -76,6 +89,7 @@ public class PatioActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(tableAdapter);
+        tableAdapter.setNumberOfTables(8);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,0/*ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT*/) {
             @Override
@@ -98,6 +112,7 @@ public class PatioActivity extends AppCompatActivity {
                     patioReference.document(documentSnapshot.getId()).update("tableOccupied",false).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
+
                             if (task.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), "stolik wolny", Toast.LENGTH_SHORT).show();
                             } else {

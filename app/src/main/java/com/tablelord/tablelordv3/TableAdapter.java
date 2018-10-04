@@ -11,6 +11,9 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.TableHolder> {
 
     public TableAdapter(@NonNull FirestoreRecyclerOptions<Table> options) {
@@ -18,12 +21,36 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
     }
 
     private OnItemCLickListener onItemCLickListener;
+    private int numberOfTables;
+    private boolean redLight = true;
+    private List<Boolean> occupiedMarker = new ArrayList<>();
+
+    public boolean isRedLight() {
+        return redLight;
+    }
+
+    public void setNumberOfTables(int numberOfTables) {
+        this.numberOfTables = numberOfTables;
+    }
 
     @Override
     protected void onBindViewHolder(@NonNull TableHolder holder, int position, @NonNull Table model) {
         holder.textViewTableNumber.setText(model.getTableNumber());
         holder.textViewTableSeats.setText(model.getTableSeats());
         holder.textViewTableOccupied.setText(String.valueOf(model.isTableOccupied()));
+//change recyclerview view color based on occupied status
+        if (model.isTableOccupied()== true){ holder.itemView.setBackgroundColor(0x7FFF0000); }
+        else { holder.itemView.setBackgroundColor(R.color.material_blue_grey_800); }
+
+//
+//        if (model.isTableOccupied() == true){
+//            occupiedMarker.add(model.isTableOccupied());
+//        }
+//        if (numberOfTables == occupiedMarker.size()){
+//             redLight = true;
+//        }else{
+//            redLight = false;
+//        }
     }
 
     @NonNull
@@ -31,6 +58,7 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
     public TableHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_table,parent,false);
         return new TableHolder(v);
+
     }
 
     class TableHolder extends RecyclerView.ViewHolder{
@@ -44,6 +72,7 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
             textViewTableNumber = itemView.findViewById(R.id.text_view_table_number);
             textViewTableSeats = itemView.findViewById(R.id.text_view_table_seats);
             textViewTableOccupied = itemView.findViewById(R.id.text_view_table_occupied);
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
