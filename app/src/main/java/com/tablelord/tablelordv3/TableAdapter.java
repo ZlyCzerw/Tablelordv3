@@ -1,5 +1,6 @@
 package com.tablelord.tablelordv3;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -37,10 +38,10 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
     protected void onBindViewHolder(@NonNull TableHolder holder, int position, @NonNull Table model) {
         holder.textViewTableNumber.setText(model.getTableNumber());
         holder.textViewTableSeats.setText(model.getTableSeats());
-        holder.textViewTableOccupied.setText(String.valueOf(model.isTableOccupied()));
+        // holder.textViewTableOccupied.setText(String.valueOf(model.isTableOccupied()));
 //change recyclerview view color based on occupied status
-        if (model.isTableOccupied()== true){ holder.itemView.setBackgroundColor(0x7FFF0000); }
-        else { holder.itemView.setBackgroundColor(R.color.material_blue_grey_800); }
+        if (model.isTableOccupied()== true){ holder.itemView.setBackgroundColor(Color.parseColor("#FF635C")); }
+        else { holder.itemView.setBackgroundColor(Color.parseColor("#8bd7e0"));}
 
 //
 //        if (model.isTableOccupied() == true){
@@ -65,13 +66,13 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
 
         TextView textViewTableNumber;
         TextView textViewTableSeats;
-        TextView textViewTableOccupied;
+        //TextView textViewTableOccupied;
 
         public TableHolder(@NonNull View itemView) {
             super(itemView);
             textViewTableNumber = itemView.findViewById(R.id.text_view_table_number);
             textViewTableSeats = itemView.findViewById(R.id.text_view_table_seats);
-            textViewTableOccupied = itemView.findViewById(R.id.text_view_table_occupied);
+           // textViewTableOccupied = itemView.findViewById(R.id.text_view_table_occupied);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {

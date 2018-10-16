@@ -19,6 +19,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import me.anwarshahriar.calligrapher.Calligrapher;
+
 public class Level0Activity extends AppCompatActivity {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -29,6 +31,9 @@ public class Level0Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level0);
+
+        Calligrapher calligrapher = new Calligrapher(this);
+        calligrapher.setFont(this, "Comfortaa.ttf", true);
 
         FloatingActionButton basement = findViewById(R.id.button_basement);
         basement.setOnClickListener(new View.OnClickListener() {
