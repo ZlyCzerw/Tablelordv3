@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,8 +20,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -28,6 +32,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.opencensus.tags.Tag;
+import io.opencensus.tags.TagContext;
 import me.anwarshahriar.calligrapher.Calligrapher;
 
 public class PatioActivity extends AppCompatActivity {
@@ -35,6 +41,7 @@ public class PatioActivity extends AppCompatActivity {
     private FABColorMaker fabColorMaker;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference patioReference = db.collection("patio");
+
     private TableAdapter tableAdapter;
 
     private List<String> occupiedMarkerPatio = new ArrayList<>();
@@ -48,10 +55,16 @@ public class PatioActivity extends AppCompatActivity {
     private int level0Size = 15;
     private int harleySize = 11;
 
-    private CollectionReference harleyFull = db.collection("harley");
-    private CollectionReference basementFull = db.collection("basement");
-    private CollectionReference level0Full = db.collection("level0");
-    private CollectionReference patioFull = db.collection("patio");
+//    private CollectionReference harleyFull = db.collection("harley");
+//    private CollectionReference basementFull = db.collection("basement");
+//    private CollectionReference level0Full = db.collection("level0");
+//    private CollectionReference patioFull = db.collection("patio");
+
+    private CollectionReference buttonBasement = db.collection("buttonBasement");
+    private CollectionReference buttonHarley = db.collection("buttonHarley");
+    private CollectionReference buttonLevel0 = db.collection("buttonLevel0");
+    private CollectionReference buttonPatio = db.collection("buttonPatio");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,114 +74,440 @@ public class PatioActivity extends AppCompatActivity {
         Calligrapher calligrapher = new Calligrapher(this);
         calligrapher.setFont(this, "Comfortaa.ttf", true);
 //START WITH FAB
-        patioFull
-                .whereEqualTo("tableOccupied", true)
+
+        patioReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "listen:error", e);
+                    return;
+                }
+
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d("TAG", "New Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case MODIFIED:
+                            patioReference
+                                    .whereEqualTo("tableOccupied", true)
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                occupiedMarkerPatio.clear();
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    occupiedMarkerPatio.add(document.getId());
+                                                    Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+                                                    //change FAB color
+                                                    FloatingActionButton patio = findViewById(R.id.button_level_patio);
+                                                    if (occupiedMarkerPatio.size() == patioSize) {
+                                                        patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#BF360C")));
+                                                        buttonPatio.document("patio").update("redLight",true);
+
+                                                    } else {
+                                                        patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#2EC117")));
+                                                        buttonPatio.document("patio").update("redLight",false);
+                                                    }
+                                                }
+                                            } else {
+                                                Log.d(getClass().getName(), "Error getting documents: ", task.getException());
+                                            }
+
+                                        }
+                                    });
+
+                            Log.d("TAG", "Modified Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case REMOVED:
+                            Log.d("TAG", "Removed Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                    }
+                }
+
+            }
+        });
+        buttonHarley.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "listen:error", e);
+                    return;
+                }
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d("TAG", "New Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case MODIFIED:
+
+                            buttonHarley
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            FloatingActionButton harley = findViewById(R.id.button_level_harley);
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    boolean redLight = (Boolean) document.get("redLight");
+                                                    if (redLight == true) {
+                                                        harley.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#BF360C")));
+                                                    } else {
+                                                        harley.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#2EC117")));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+
+                            Log.d("TAG", "Modified Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case REMOVED:
+                            Log.d("TAG", "Removed Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                    }
+                }
+
+            }
+        });
+
+        buttonBasement.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "listen:error", e);
+                    return;
+                }
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d("TAG", "New Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case MODIFIED:
+
+                            buttonBasement
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            FloatingActionButton basement = findViewById(R.id.button_basement);
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    boolean redLight = (Boolean) document.get("redLight");
+                                                    if (redLight == true) {
+                                                        basement.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#BF360C")));
+                                                    } else {
+                                                        basement.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#2EC117")));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+
+                            Log.d("TAG", "Modified Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case REMOVED:
+                            Log.d("TAG", "Removed Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                    }
+                }
+
+            }
+        });
+        buttonLevel0.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "listen:error", e);
+                    return;
+                }
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d("TAG", "New Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case MODIFIED:
+
+                            buttonLevel0
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            FloatingActionButton level0 = findViewById(R.id.button_level_zero);
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    boolean redLight = (Boolean) document.get("redLight");
+                                                    if (redLight == true) {
+                                                        level0.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#BF360C")));
+                                                    } else {
+                                                        level0.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#2EC117")));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+
+                            Log.d("TAG", "Modified Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case REMOVED:
+                            Log.d("TAG", "Removed Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                    }
+                }
+
+            }
+        });
+        buttonPatio.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "listen:error", e);
+                    return;
+                }
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d("TAG", "New Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case MODIFIED:
+
+                            buttonPatio
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            FloatingActionButton patio = findViewById(R.id.button_level_patio);
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    boolean redLight = (Boolean) document.get("redLight");
+                                                    if (redLight == true) {
+                                                        patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#BF360C")));
+                                                    } else {
+                                                        patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                                                .parseColor("#2EC117")));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+
+                            Log.d("TAG", "Modified Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                        case REMOVED:
+                            Log.d("TAG", "Removed Msg: " + dc.getDocument().toObject(Table.class));
+                            break;
+                    }
+                }
+
+            }
+        });
+
+//        patioFull
+//                .whereEqualTo("tableOccupied", true)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                occupiedMarkerPatio.add(document.getId());
+//                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+//                                //change FAB color
+//                                FloatingActionButton patio = findViewById(R.id.button_level_patio);
+//                                if (occupiedMarkerPatio.size() == patioSize) {
+//                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#BF360C")));
+//
+//                                } else {
+//                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#2EC117")));
+//                                }
+//                            }
+//                        } else {
+//                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
+//                        }
+//
+//                    }
+//                });
+//
+//        harleyFull
+//                .whereEqualTo("tableOccupied", true)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                occupiedMarkerHarley.add(document.getId());
+//                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+//                                FloatingActionButton harley = findViewById(R.id.button_level_harley);
+//                                //change FAB color
+//                                if (occupiedMarkerHarley.size() == harleySize) {
+//                                    harley.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#BF360C")));
+//
+//                                } else {
+//                                    harley.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#2EC117")));
+//                                }
+//                            }
+//                        } else {
+//                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
+//                        }
+//
+//                    }
+//                });
+//        basementFull
+//                .whereEqualTo("tableOccupied", true)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                occupiedMarkerBasement.add(document.getId());
+//                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+//                                FloatingActionButton basement = findViewById(R.id.button_basement);
+//                                //change FAB color
+//                                if (occupiedMarkerBasement.size() == basementSize) {
+//                                    basement.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#BF360C")));
+//
+//                                } else {
+//                                    basement.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#2EC117")));
+//                                }
+//                            }
+//                        } else {
+//                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
+//                        }
+//
+//                    }
+//                });
+//        level0Full
+//                .whereEqualTo("tableOccupied", true)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                occupiedMarkerLevel0.add(document.getId());
+//                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+//                                FloatingActionButton patio = findViewById(R.id.button_level_zero);
+//                                //change FAB color
+//                                if (occupiedMarkerLevel0.size() == level0Size) {
+//                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#BF360C")));
+//
+//                                } else {
+//                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+//                                            .parseColor("#2EC117")));
+//                                }
+//                            }
+//                        } else {
+//                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
+//                        }
+//
+//                    }
+//                });
+        buttonPatio
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        FloatingActionButton patio = findViewById(R.id.button_level_patio);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                occupiedMarkerPatio.add(document.getId());
-                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
-                                FloatingActionButton patio = findViewById(R.id.button_level_patio);
-                                //change FAB color
-
-                                if (occupiedMarkerPatio.size() == patioSize) {
+                                boolean redLight = (Boolean) document.get("redLight");
+                                if (redLight == true) {
                                     patio.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#BF360C")));
-
                                 } else {
                                     patio.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#2EC117")));
                                 }
                             }
-                        } else {
-                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                         }
-
                     }
                 });
 
-        harleyFull
-                .whereEqualTo("tableOccupied", true)
+
+        buttonHarley
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        FloatingActionButton harley = findViewById(R.id.button_level_harley);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                occupiedMarkerHarley.add(document.getId());
-                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
-                                FloatingActionButton harley = findViewById(R.id.button_level_harley);
-                                //change FAB color
-                                if (occupiedMarkerHarley.size() == harleySize) {
+                                boolean redLight = (Boolean) document.get("redLight");
+                                if (redLight == true) {
                                     harley.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#BF360C")));
-
                                 } else {
                                     harley.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#2EC117")));
                                 }
                             }
-                        } else {
-                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                         }
-
                     }
                 });
-        basementFull
-                .whereEqualTo("tableOccupied", true)
+
+        buttonBasement
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        FloatingActionButton basement = findViewById(R.id.button_basement);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                occupiedMarkerBasement.add(document.getId());
-                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
-                                FloatingActionButton basement = findViewById(R.id.button_basement);
-                                //change FAB color
-                                if (occupiedMarkerBasement.size() == basementSize) {
+                                boolean redLight = (Boolean) document.get("redLight");
+                                if (redLight == true) {
                                     basement.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#BF360C")));
-
                                 } else {
                                     basement.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#2EC117")));
                                 }
                             }
-                        } else {
-                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                         }
-
                     }
                 });
-        level0Full
-                .whereEqualTo("tableOccupied", true)
+
+        buttonLevel0
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        FloatingActionButton level0 = findViewById(R.id.button_level_zero);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                occupiedMarkerLevel0.add(document.getId());
-                                Log.d(getClass().getName(), document.getId() + " => " + document.getData());
-                                FloatingActionButton patio = findViewById(R.id.button_level_zero);
-                                //change FAB color
-                                if (occupiedMarkerLevel0.size() == level0Size) {
-                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                boolean redLight = (Boolean) document.get("redLight");
+                                if (redLight == true) {
+                                    level0.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#BF360C")));
-
                                 } else {
-                                    patio.setBackgroundTintList(ColorStateList.valueOf(Color
+                                    level0.setBackgroundTintList(ColorStateList.valueOf(Color
                                             .parseColor("#2EC117")));
                                 }
                             }
-                        } else {
-                            Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                         }
-
                     }
                 });
 
@@ -205,6 +544,8 @@ public class PatioActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+
 //END WITH FAB
 
 

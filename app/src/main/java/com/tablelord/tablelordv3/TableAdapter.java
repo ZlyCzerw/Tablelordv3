@@ -24,7 +24,7 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
     private OnItemCLickListener onItemCLickListener;
     private int numberOfTables;
     private boolean redLight = true;
-    private List<Boolean> occupiedMarker = new ArrayList<>();
+
 
     public boolean isRedLight() {
         return redLight;
@@ -43,15 +43,7 @@ public class TableAdapter extends FirestoreRecyclerAdapter<Table,TableAdapter.Ta
         if (model.isTableOccupied()== true){ holder.itemView.setBackgroundColor(Color.parseColor("#FF635C")); }
         else { holder.itemView.setBackgroundColor(Color.parseColor("#8bd7e0"));}
 
-//
-//        if (model.isTableOccupied() == true){
-//            occupiedMarker.add(model.isTableOccupied());
-//        }
-//        if (numberOfTables == occupiedMarker.size()){
-//             redLight = true;
-//        }else{
-//            redLight = false;
-//        }
+
     }
 
     @NonNull
