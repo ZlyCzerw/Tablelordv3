@@ -91,6 +91,7 @@ public class HarleyActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     occupiedMarkerHarley.add(document.getId());
                                                     Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+                                                }
                                                     //change FAB color
                                                     FloatingActionButton harley = findViewById(R.id.button_level_harley);
                                                     if (occupiedMarkerHarley.size() == harleySize) {
@@ -103,7 +104,7 @@ public class HarleyActivity extends AppCompatActivity {
                                                                 .parseColor("#2EC117")));
                                                         buttonHarley.document("harley").update("redLight",false);
                                                     }
-                                                }
+
                                             } else {
                                                 Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                                             }

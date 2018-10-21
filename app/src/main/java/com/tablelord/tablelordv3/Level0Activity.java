@@ -92,6 +92,7 @@ public class Level0Activity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     occupiedMarkerLevel0.add(document.getId());
                                                     Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+                                                }
                                                     //change FAB color
                                                     FloatingActionButton level0 = findViewById(R.id.button_level_zero);
                                                     if (occupiedMarkerLevel0.size() == level0Size) {
@@ -104,7 +105,7 @@ public class Level0Activity extends AppCompatActivity {
                                                                 .parseColor("#2EC117")));
                                                         buttonLevel0.document("level0").update("redLight",false);
                                                     }
-                                                }
+
                                             } else {
                                                 Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                                             }

@@ -101,6 +101,7 @@ public class PatioActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     occupiedMarkerPatio.add(document.getId());
                                                     Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+                                                }
                                                     //change FAB color
                                                     FloatingActionButton patio = findViewById(R.id.button_level_patio);
                                                     if (occupiedMarkerPatio.size() == patioSize) {
@@ -113,7 +114,6 @@ public class PatioActivity extends AppCompatActivity {
                                                                 .parseColor("#2EC117")));
                                                         buttonPatio.document("patio").update("redLight",false);
                                                     }
-                                                }
                                             } else {
                                                 Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                                             }

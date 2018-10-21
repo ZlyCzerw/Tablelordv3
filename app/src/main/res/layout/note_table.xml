@@ -20,7 +20,8 @@
         android:textColor="#ffffff"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:paddingEnd="8dp"/>
 
     <TextView
         android:id="@+id/text_view_table_number"

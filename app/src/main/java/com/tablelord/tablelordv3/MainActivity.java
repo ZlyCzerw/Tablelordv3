@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
@@ -85,24 +86,26 @@ public class MainActivity extends AppCompatActivity {
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                             if (task.isSuccessful()) {
                                                 occupiedMarkerBasement.clear();
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                for (final QueryDocumentSnapshot document : task.getResult()) {
                                                     occupiedMarkerBasement.add(document.getId());
                                                     Log.d(getClass().getName(), document.getId() + " => " + document.getData());
+                                                }
                                                     //change FAB color
                                                     //TU MYŚLĘ, ŻE JEST PROBLEM. KIEDY KILKA APLIKACJI PATRZY NA TĄ SAMĄ AKTYWNOŚĆ, WSZYSTKIE NADPISUJĄ TRUE/FALSE DO BAZY DANYCH
                                                     FloatingActionButton basement = findViewById(R.id.button_basement);
                                                     if (occupiedMarkerBasement.size() == basementSize) {
                                                         basement.setBackgroundTintList(ColorStateList.valueOf(Color
                                                                 .parseColor("#BF360C")));
+
                                                         buttonBasement.document("basement").update("redLight",true);
+
                                                     } else {
                                                         basement.setBackgroundTintList(ColorStateList.valueOf(Color
                                                                 .parseColor("#2EC117")));
 
-                                                            buttonBasement.document("basement").update("redLight", false);
-
+                                                        buttonBasement.document("basement").update("redLight", false);
                                                     }
-                                                }
+
                                             } else {
                                                 Log.d(getClass().getName(), "Error getting documents: ", task.getException());
                                             }
